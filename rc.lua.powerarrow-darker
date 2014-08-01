@@ -76,19 +76,23 @@ mail       = terminal .. " -e mutt "
 iptraf     = terminal .. " -g 180x54-20+34 -e sudo iptraf-ng -i all "
 musicplr   = terminal .. " -g 130x34-320+16 -e ncmpcpp "
 
+-- lain
+lain.layout.termfair.nmaster   = 3
+lain.layout.termfair.ncol      = 1
+lain.layout.centerfair.nmaster = 3
+lain.layout.centerfair.ncol    = 1
+
 local layouts = {
---    awful.layout.suit.floating,
     awful.layout.suit.tile,
---    awful.layout.suit.tile.bottom,
---    awful.layout.suit.fair,
---    awful.layout.suit.fair.horizontal,
-}
+    awful.layout.suit.floating,
+    }
+
 -- }}}
 
 -- {{{ Tags
 tags = {
-   names = { "1", "2", "3", "4", "5", "6", "7", "8", "9"},
-   layout = { layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1], layouts[1] }
+   names  = { "1", "2", "3", "4", "5", "6", "7", "8", "9" },
+   layout = { layouts[1], layouts[2], layouts[2], layouts[2], layouts[2], layouts[2], layouts[2], layouts[2], layouts[2] }
 }
 
 for s = 1, screen.count() do
@@ -121,12 +125,12 @@ lain.widgets.calendar:attach(mytextclock, { font_size = 9 })
 -- Mail IMAP check
 mailicon = wibox.widget.imagebox(beautiful.widget_mail)
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.util.spawn(mail) end)))
---[[ commented because it needs to be set before use
+--[[ commented because it needs to be set before use]]
 mailwidget = wibox.widget.background(lain.widgets.imap({
     timeout  = 180,
-    server   = "imap.zzzzz.com",
-    mail     = "xxxxxxxxxx@zzzzz.com",
-    password = "yyyyyyyyyy",
+    server   = "zzzz.yyyy.com",
+    mail     = "xxxxxxxxx@yyyy.com",
+    password = "xxxxxxxxx",
     settings = function()
         if mailcount > 0 then
             widget:set_text(" " .. mailcount .. " ")
@@ -137,7 +141,7 @@ mailwidget = wibox.widget.background(lain.widgets.imap({
         end
     end
 }), "#313131")
-]]
+--]]
 
 -- MPD
 mpdicon = wibox.widget.imagebox(beautiful.widget_music)
@@ -257,48 +261,7 @@ mywibox = {}
 mypromptbox = {}
 mylayoutbox = {}
 mytaglist = {}
-mytaglist.buttons = awful.util.table.join(
-                    awful.button({ }, 1, awful.tag.viewonly),
-                    awful.button({ modkey }, 1, awful.client.movetotag),
-                    awful.button({ }, 3, awful.tag.viewtoggle),
-                    awful.button({ modkey }, 3, awful.client.toggletag),
-                    awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
-                    awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
-                    )
 mytasklist = {}
-mytasklist.buttons = awful.util.table.join(
-                     awful.button({ }, 1, function (c)
-                                              if c == client.focus then
-                                                  c.minimized = true
-                                              else
-                                                  -- Without this, the following
-                                                  -- :isvisible() makes no sense
-                                                  c.minimized = false
-                                                  if not c:isvisible() then
-                                                      awful.tag.viewonly(c:tags()[1])
-                                                  end
-                                                  -- This will also un-minimize
-                                                  -- the client, if needed
-                                                  client.focus = c
-                                                  c:raise()
-                                              end
-                                          end),
-                     awful.button({ }, 3, function ()
-                                              if instance then
-                                                  instance:hide()
-                                                  instance = nil
-                                              else
-                                                  instance = awful.menu.clients({ width=250 })
-                                              end
-                                          end),
-                     awful.button({ }, 4, function ()
-                                              awful.client.focus.byidx(1)
-                                              if client.focus then client.focus:raise() end
-                                          end),
-                     awful.button({ }, 5, function ()
-                                              awful.client.focus.byidx(-1)
-                                              if client.focus then client.focus:raise() end
-                                          end))
 
 for s = 1, screen.count() do
 
@@ -314,10 +277,10 @@ for s = 1, screen.count() do
                             awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
 
     -- Create a taglist widget
-    mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons)
+    mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all)
 
     -- Create a tasklist widget
-    mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.focused, mytasklist.buttons)
+    mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.focused)
 
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s, height = 18 })
@@ -364,8 +327,6 @@ for s = 1, screen.count() do
     right_layout:add(arrl_dl)
     right_layout:add(mytextclock)
     right_layout:add(spr)
-    right_layout:add(arrl_ld)
-    right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
     local layout = wibox.layout.align.horizontal()
@@ -376,15 +337,6 @@ for s = 1, screen.count() do
 
 end
 -- }}}
-
---[[ {{{ Mouse Bindings
-root.buttons(awful.util.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end),
-    awful.button({ }, 4, awful.tag.viewnext),
-    awful.button({ }, 5, awful.tag.viewprev)
-))
--- }}} 
-]]
 
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
@@ -504,12 +456,6 @@ globalkeys = awful.util.table.join(
     -- Copy to clipboard
     awful.key({ modkey }, "c", function () os.execute("xsel -p -o | xsel -i -b") end),
 
-    -- User programs
-    awful.key({ modkey }, "q", function () awful.util.spawn(browser) end),
-    awful.key({ modkey }, "i", function () awful.util.spawn(browser2) end),
-    awful.key({ modkey }, "s", function () awful.util.spawn(gui_editor) end),
-    awful.key({ modkey }, "g", function () awful.util.spawn(graphics) end),
-
     -- Prompt
     --awful.key({ modkey }, "r", function () mypromptbox[mouse.screen]:run() end),
     awful.key({        }, "F4", function () awful.util.spawn(dmenu) end),
@@ -525,11 +471,9 @@ globalkeys = awful.util.table.join(
 
 clientkeys = awful.util.table.join(
     awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end),
-    awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end),
+    awful.key({ modkey, 	  }, "q",      function (c) c:kill()                         end),
     awful.key({ modkey,           }, "t",      awful.client.floating.toggle                     ),
     awful.key({ modkey,           }, "Return", function (c) c:swap(awful.client.getmaster()) end),
---  awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
---  awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end),
     awful.key({ modkey,           }, "n",
         function (c)
             -- The client currently has the input focus, so it cannot be
@@ -603,14 +547,17 @@ awful.rules.rules = {
     { rule = { class = "MPlayer" },
           properties = { floating = true } },
 
+    { rule = { class = "XTerm" },
+          properties = { tiling = true } },
+
     { rule = { class = "Skype" },
+          properties = { floating = true } },
+   
+    { rule = { class = "psi", "chat" },
           properties = { floating = true } },
 
     { rule = { instance = "plugin-container" },
-          properties = { tag = tags[1][1] } },
-
-	  { rule = { class = "Gimp" },
-     	    properties = { tag = tags[1][4] } },
+          properties = { floating = true } },
 
     { rule = { class = "Gimp", role = "gimp-image-window" },
           properties = { maximized_horizontal = true,
